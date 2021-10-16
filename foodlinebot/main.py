@@ -25,6 +25,18 @@ class name:
         with open("D:/linebot/name/name.pickle","wb") as f:
             pickle.dump(self.name,f)
 
+class action:
+    def __init__(self):
+        self.name = []
+    def load(self):
+        dirs = os.listdir("D:/linebot/action")
+        if "action.pickle" in dirs:
+            with open("D:/linebot/action/action.pickle","rb") as f:
+                self.name = pickle.load(f)
+    def dump(self):
+        with open("D:/linebot/action/action.pickle","wb") as f:
+            pickle.dump(self.name,f)
+
 def react(event):
     if event.message.text == "抽2D":
         imgs = os.listdir("D:/linebot/static")
@@ -83,7 +95,33 @@ def react(event):
             TextSendMessage(text='紀錄成功')
         )
 
-    else:
+    elif "新增回應" in event.message.text:
+        msg = event.message.text[5:]
+        count = 0
+        fullname = ""
+        for i in msg:
+            count += 1 
+            if i == "=" or i=='＝':
+                break
+            else:
+                fullname += i
+        a = action()
+        a.load()
+        for i in a.name:
+            if i['fullname'] == fullname and i['name'] == msg[count:]:
+                line_bot_api.reply_message(  # 回復傳入的訊息文字
+                    event.reply_token,
+                    TextSendMessage(text='回應已存在')
+                )
+                return
+        a.name.append({'fullname':fullname,'name':msg[count:]})
+        a.dump()
+        line_bot_api.reply_message(  # 回復傳入的訊息文字
+            event.reply_token,
+            TextSendMessage(text='紀錄成功')
+        )
+
+    else if event.message.text == "a":
         flag = 1
         msg = event.message.text
         fullname = ""
@@ -103,6 +141,18 @@ def react(event):
                     event.reply_token,
                     TextSendMessage(text=i['name'])
                 )
+
+    else:
+        msg = event.message.text
+        a = action()
+        a.load()
+        for i in a.name:
+            if i['fullname'] == msg:
+                line_bot_api.reply_message(  # 回復傳入的訊息文字
+                    event.reply_token,
+                    TextSendMessage(text=i['name'])
+                )
+
     
     
  
